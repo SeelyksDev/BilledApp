@@ -28,9 +28,38 @@ export const initNewBillPage = ({ document, onNavigate, store, localStorage }) =
 const handleChangeFile = (e, { store, localStorage }) => {
   e.preventDefault()
 
-  const file = document.querySelector(`input[data-testid="file"]`).files[0]
+  const fileInput = document.querySelector(`input[data-testid="file"]`)
+  const file = fileInput.files[0]
   const filePath = e.target.value.split(/\\/g)
   const fileName = filePath[filePath.length - 1]
+
+  // Vérification de l'extension du fichier
+  const allowedExtensions = ['jpg', 'jpeg', 'png']
+  const fileExtension = fileName.split('.').pop().toLowerCase()
+
+  if (!allowedExtensions.includes(fileExtension)) {
+    // Réinitialise le champ pour empêcher l'envoi du fichier invalide
+    fileInput.value = ""
+    billFileState.fileUrl = null
+    billFileState.fileName = null
+    billFileState.billId = null
+
+    // Affiche un message d'erreur à l'utilisateur
+    const errorMessage = document.querySelector(`[data-testid="file-error-message"]`)
+    console.log('errorMessage trouvé ?', errorMessage) 
+    if (errorMessage) {
+      errorMessage.textContent = "Format de fichier invalide. Seuls les fichiers jpg, jpeg ou png sont acceptés."
+      errorMessage.style.display = "block"
+    }
+
+    return
+  }
+
+  // Si le fichier est valide, on masque un éventuel message d'erreur précédent
+  const errorMessage = document.querySelector(`[data-testid="file-error-message"]`)
+  if (errorMessage) {
+    errorMessage.style.display = "none"
+  }
 
   const formData = new FormData()
   const email = JSON.parse(localStorage.getItem("user")).email
