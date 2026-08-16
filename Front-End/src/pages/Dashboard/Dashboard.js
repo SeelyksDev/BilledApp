@@ -272,10 +272,13 @@ export const handleShowTickets = (e, bills, index, document) => {
   }
 
   bills.forEach(bill => {
-    const openBill = document.querySelector(`#open-bill${bill.id}`)
-    if (openBill) openBill.addEventListener('click', (e) =>
+  const openBill = document.querySelector(`#open-bill${bill.id}`)
+  if (openBill && !openBill.dataset.listenerAttached) {
+    openBill.addEventListener('click', (e) =>
       handleEditTicket(e, bill, bills, document))
-  })
+    openBill.dataset.listenerAttached = 'true'
+  }
+})
 
   return bills
 }
