@@ -24,6 +24,16 @@ export const initBillsPage = ({ document, onNavigate, store, localStorage }) => 
     })
   }
 
+   // Icônes "télécharger" pour télécharger les justificatifs
+  const iconDownloads = document.querySelectorAll(`div[data-testid="icon-download"]`)
+  if (iconDownloads) {
+    iconDownloads.forEach(icon => {
+      icon.addEventListener('click', () => {
+        handleClickIconDownload(icon)
+      })
+    })
+  }
+
   // Initialise le bouton de déconnexion
   new Logout({ document, localStorage, onNavigate })
 }
@@ -46,6 +56,29 @@ const handleClickIconEye = (icon, document) => {
   }, { once: true })
 
   modal.show()
+}
+
+/**
+ * Gère le clic sur l'icône télécharger
+ */
+const handleClickIconDownload = async (icon) => {
+  const billUrl = icon.getAttribute("data-bill-url")
+  const fileName = icon.getAttribute("data-file-name")
+
+  try {
+    const response = await fetch(billUrl)
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Erreur lors du téléchargement:', error)
+  }
 }
 
 /**

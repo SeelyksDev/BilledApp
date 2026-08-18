@@ -129,6 +129,30 @@ export const handleClickIconEye = (document) => {
 }
 
 /**
+ * Gère le clic sur l'icône télécharger (admin)
+ */
+export const handleClickIconDownload = async (document) => {
+  const icon = document.querySelector('#icon-download-d')
+  const billUrl = icon.getAttribute("data-bill-url")
+  const fileName = icon.getAttribute("data-file-name")
+
+  try {
+    const response = await fetch(billUrl)
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Erreur lors du téléchargement:', error)
+  }
+}
+
+/**
  * Gère l'édition d'un ticket
  * Exported for testing purposes
  */
@@ -165,6 +189,9 @@ export const handleEditTicket = (e, bill, bills, document) => {
 
   const iconEye = document.querySelector('#icon-eye-d')
   if (iconEye) iconEye.addEventListener('click', () => handleClickIconEye(document))
+
+  const iconDownload = document.querySelector('#icon-download-d')
+  if (iconDownload) iconDownload.addEventListener('click', () => handleClickIconDownload(document))
 
   const btnAccept = document.querySelector('#btn-accept-bill')
   if (btnAccept) btnAccept.addEventListener('click', (e) =>
