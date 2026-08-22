@@ -89,7 +89,7 @@ export const getStatus = (index) => {
 /**
  * Initialise la page Dashboard - Attache les event listeners
  */
-export const initDashboardPage = ({ document, onNavigate, bills, localStorage }) => {
+export const initDashboardPage = ({ document, onNavigate, bills, localStorage, store, onSuccess }) => {
   if (!document) {
     console.log('Dashboard: document is MISSING')
     return
@@ -100,11 +100,11 @@ export const initDashboardPage = ({ document, onNavigate, bills, localStorage })
   const arrowIcon3 = document.querySelector('#arrow-icon3')
 
   if (arrowIcon1) arrowIcon1.addEventListener('click', (e) =>
-    handleShowTickets(e, bills, 1, document))
+    handleShowTickets(e, bills, 1, document, store, onSuccess))
   if (arrowIcon2) arrowIcon2.addEventListener('click', (e) =>
-    handleShowTickets(e, bills, 2, document))
+    handleShowTickets(e, bills, 2, document, store, onSuccess))
   if (arrowIcon3) arrowIcon3.addEventListener('click', (e) =>
-    handleShowTickets(e, bills, 3, document))
+    handleShowTickets(e, bills, 3, document, store, onSuccess))
 
   new Logout({ localStorage, onNavigate, document })
 }
@@ -156,7 +156,7 @@ export const handleClickIconDownload = async (document) => {
  * Gère l'édition d'un ticket
  * Exported for testing purposes
  */
-export const handleEditTicket = (e, bill, bills, document) => {
+export const handleEditTicket = (e, bill, bills, document, store, onSuccess) => {
   if (dashboardState.counter === undefined || dashboardState.id !== bill.id) {
     dashboardState.counter = 0
   }
@@ -195,43 +195,30 @@ export const handleEditTicket = (e, bill, bills, document) => {
 
   const btnAccept = document.querySelector('#btn-accept-bill')
   if (btnAccept) btnAccept.addEventListener('click', (e) =>
-    handleAcceptSubmit(e, bill, document))
+    handleAcceptSubmit(e, bill, document, store, onSuccess))
 
   const btnRefuse = document.querySelector('#btn-refuse-bill')
   if (btnRefuse) btnRefuse.addEventListener('click', (e) =>
-    handleRefuseSubmit(e, bill, document))
+    handleRefuseSubmit(e, bill, document, store, onSuccess))
 }
 
 /**
  * Gère l'acceptation d'une bill
  * Exported for testing purposes
  */
-export const handleAcceptSubmit = (e, bill, document) => {
+export const handleAcceptSubmit = async (e, bill, document, store, onSuccess) => {
   const newBill = {
     ...bill,
     status: 'accepted',
     commentAdmin: document.querySelector('#commentary2').value
   }
 
-  // Afficher le big billed icon
-  const container = document.querySelector('.dashboard-right-container div')
-  if (container) {
-    container.innerHTML = `
-      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
-    `
-  } else {
-    // Fallback pour les tests: ajouter l'icône au body
-    const iconDiv = document.createElement('div')
-    iconDiv.id = 'big-billed-icon'
-    iconDiv.setAttribute('data-testid', 'big-billed-icon')
-    iconDiv.innerHTML = BigBilledIcon
-    document.body.appendChild(iconDiv)
+  await updateBill(newBill, store)
+
+  if (onSuccess) {
+    onSuccess()
   }
 
-  const navbar = document.querySelector('.vertical-navbar')
-  if (navbar) navbar.style.height = '120vh'
-
-  // Note: updateBill appelée par le code appelant
   return newBill
 }
 
@@ -239,32 +226,19 @@ export const handleAcceptSubmit = (e, bill, document) => {
  * Gère le refus d'une bill
  * Exported for testing purposes
  */
-export const handleRefuseSubmit = (e, bill, document) => {
+export const handleRefuseSubmit = async (e, bill, document, store, onSuccess) => {
   const newBill = {
     ...bill,
     status: 'refused',
     commentAdmin: document.querySelector('#commentary2').value
   }
 
-  // Afficher le big billed icon
-  const container = document.querySelector('.dashboard-right-container div')
-  if (container) {
-    container.innerHTML = `
-      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
-    `
-  } else {
-    // Fallback pour les tests: ajouter l'icône au body
-    const iconDiv = document.createElement('div')
-    iconDiv.id = 'big-billed-icon'
-    iconDiv.setAttribute('data-testid', 'big-billed-icon')
-    iconDiv.innerHTML = BigBilledIcon
-    document.body.appendChild(iconDiv)
+  await updateBill(newBill, store)
+
+  if (onSuccess) {
+    onSuccess()
   }
 
-  const navbar = document.querySelector('.vertical-navbar')
-  if (navbar) navbar.style.height = '120vh'
-
-  // Note: updateBill appelée par le code appelant
   return newBill
 }
 
@@ -272,7 +246,7 @@ export const handleRefuseSubmit = (e, bill, document) => {
  * Gère l'affichage/masquage des tickets
  * Exported for testing purposes
  */
-export const handleShowTickets = (e, bills, index, document) => {
+export const handleShowTickets = (e, bills, index, document, store, onSuccess) => {
   if (dashboardState.counter === undefined || dashboardState.index !== index) {
     dashboardState.counter = 0
   }
@@ -299,13 +273,13 @@ export const handleShowTickets = (e, bills, index, document) => {
   }
 
   bills.forEach(bill => {
-  const openBill = document.querySelector(`#open-bill${bill.id}`)
-  if (openBill && !openBill.dataset.listenerAttached) {
-    openBill.addEventListener('click', (e) =>
-      handleEditTicket(e, bill, bills, document))
-    openBill.dataset.listenerAttached = 'true'
-  }
-})
+    const openBill = document.querySelector(`#open-bill${bill.id}`)
+    if (openBill && !openBill.dataset.listenerAttached) {
+      openBill.addEventListener('click', (e) =>
+        handleEditTicket(e, bill, bills, document, store, onSuccess))
+      openBill.dataset.listenerAttached = 'true'
+    }
+  })
 
   return bills
 }
