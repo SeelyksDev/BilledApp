@@ -213,6 +213,22 @@ export const handleAcceptSubmit = async (e, bill, document, store, onSuccess) =>
     commentAdmin: document.querySelector('#commentary2').value
   }
 
+  const container = document.querySelector('.dashboard-right-container div')
+  if (container) {
+    container.innerHTML = `
+      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+    `
+  } else {
+    const iconDiv = document.createElement('div')
+    iconDiv.id = 'big-billed-icon'
+    iconDiv.setAttribute('data-testid', 'big-billed-icon')
+    iconDiv.innerHTML = BigBilledIcon
+    document.body.appendChild(iconDiv)
+  }
+
+  const navbar = document.querySelector('.vertical-navbar')
+  if (navbar) navbar.style.height = '120vh'
+
   await updateBill(newBill, store)
 
   if (onSuccess) {
@@ -232,6 +248,22 @@ export const handleRefuseSubmit = async (e, bill, document, store, onSuccess) =>
     status: 'refused',
     commentAdmin: document.querySelector('#commentary2').value
   }
+
+  const container = document.querySelector('.dashboard-right-container div')
+  if (container) {
+    container.innerHTML = `
+      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+    `
+  } else {
+    const iconDiv = document.createElement('div')
+    iconDiv.id = 'big-billed-icon'
+    iconDiv.setAttribute('data-testid', 'big-billed-icon')
+    iconDiv.innerHTML = BigBilledIcon
+    document.body.appendChild(iconDiv)
+  }
+
+  const navbar = document.querySelector('.vertical-navbar')
+  if (navbar) navbar.style.height = '120vh'
 
   await updateBill(newBill, store)
 
