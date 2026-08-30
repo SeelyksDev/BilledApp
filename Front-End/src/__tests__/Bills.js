@@ -169,3 +169,57 @@ describe("When I am on Bills page and I click on the download icon", () => {
     await waitFor(() => expect(window.fetch).toHaveBeenCalled())
   })
 })
+
+describe("Given I am a user connected as Employee", () => {
+  describe("When I navigate to Bills page", () => {
+    test("Then it should fetch bills from mock API and display them", async () => {
+      const mockStore = {
+        bills: () => ({
+          list: () => Promise.resolve([
+            {
+              id: "1",
+              date: "2023-04-04",
+              status: "pending",
+              name: "Vol Paris Londres",
+              amount: 100,
+              type: "Transports",
+              email: "employee@test.tld",
+              fileUrl: "https://test.com/file.jpg",
+              fileName: "file.jpg"
+            }
+          ])
+        })
+      }
+
+      const result = await getBills(mockStore)
+      document.body.innerHTML = BillsUI({ data: result })
+
+      await waitFor(() => screen.getByText("Vol Paris Londres"))
+      expect(screen.getByText("Vol Paris Londres")).toBeTruthy()
+    })
+  })
+})
+
+describe("When an error occurs on API (404)", () => {
+  test("Then it should throw an error", async () => {
+    const mockStore = {
+      bills: () => ({
+        list: () => Promise.reject(new Error("Erreur 404"))
+      })
+    }
+
+    await expect(getBills(mockStore)).rejects.toThrow("Erreur 404")
+  })
+})
+
+describe("When an error occurs on API (500)", () => {
+  test("Then it should throw an error", async () => {
+    const mockStore = {
+      bills: () => ({
+        list: () => Promise.reject(new Error("Erreur 500"))
+      })
+    }
+
+    await expect(getBills(mockStore)).rejects.toThrow("Erreur 500")
+  })
+})
