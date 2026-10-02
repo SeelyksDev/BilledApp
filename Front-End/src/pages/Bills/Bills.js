@@ -108,7 +108,6 @@ export const getBills = async (store) => {
       }
     })
 
-    console.log('length', bills.length)
     return bills
   } catch (error) {
     console.error('Error fetching bills:', error)
