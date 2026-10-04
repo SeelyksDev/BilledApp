@@ -15,8 +15,6 @@ afterEach(() => {
 })
 
 describe("Given I am connected as an employee", () => {
-  
-  describe("NewBill component", () => {
 
     describe("When I am on NewBill Page", () => {
       test("Then the form should be rendered with all required fields", () => {
@@ -310,6 +308,4 @@ describe("Given I am connected as an employee", () => {
         consoleErrorSpy.mockRestore()
       })
     })
-
-  })
 })
